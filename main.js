@@ -36,7 +36,7 @@ const numberFormatter = (value, format = '') => {
   return formattedValue;
 };
 
-let userNumberFormat = '0,0';
+let userNumberFormat = '0,0'; // Default format if not specified by the user
 
 const userNumberFormatter = (value, format) => {
   return numeral(value).format(format);
@@ -48,41 +48,41 @@ function getDataForColumn(column, dataArr) {
 }
 
 function calculateKpiValues(chartModel) {
-    const dataArr = chartModel.data?.[0]?.data ?? [];
-    const measureColumns = _.filter(
-        chartModel.columns,
-        (col) => col.type === ColumnType.MEASURE
-    );
+  const dataArr = chartModel.data?.[0]?.data ?? [];
+  const measureColumns = _.filter(
+    chartModel.columns,
+    (col) => col.type === ColumnType.MEASURE
+  );
 
-    if (measureColumns.length === 0 || dataArr.length === 0)
-        return { mainKpiValue: 0, measures: [] };
+  if (measureColumns.length === 0 || dataArr.length === 0)
+    return { mainKpiValue: 0, measures: [] };
 
-    // Get the main KPI measure column (first measure in the x-axis)
-    const mainKpiColumn = chartModel?.config?.chartConfig[0]?.dimensions?.find(
-        (it) => it.key === 'x'
-    );
-    
-    const mainKpiValue = _.sum(
-        getDataForColumn(mainKpiColumn.columns[0], dataArr)
-    );
+  // Get the main KPI measure column (first measure in the x-axis)
+  const mainKpiColumn = chartModel?.config?.chartConfig[0]?.dimensions?.find(
+    (it) => it.key === 'x'
+  );
+  
+  const mainKpiValue = _.sum(
+    getDataForColumn(mainKpiColumn.columns[0], dataArr)
+  );
 
-    // Filter out the main KPI column from the comparison measures
-    const comparisonMeasures = measureColumns.filter(
-        (col) => col.id !== mainKpiColumn.columns[0].id
-    );
+  // Filter out the main KPI column from the comparison measures
+  const comparisonMeasures = measureColumns.filter(
+    (col) => col.id !== mainKpiColumn.columns[0].id
+  );
 
-    const measures = comparisonMeasures.map((col) => {
-        const value = _.sum(getDataForColumn(col, dataArr));
-        const change =
-            mainKpiValue !== 0 ? ((value - mainKpiValue) / Math.abs(mainKpiValue)) * 100 : 0;
-        return {
-            label: col.name,
-            value,
-            change,
-        };
-    });
+  const measures = comparisonMeasures.map((col) => {
+    const value = _.sum(getDataForColumn(col, dataArr));
+    const change =
+      mainKpiValue !== 0 ? ((value - mainKpiValue) / Math.abs(mainKpiValue)) * 100 : 0;
+    return {
+      label: col.name,
+      value,
+      change,
+    };
+  });
 
-    return { mainKpiValue, measures };
+  return { mainKpiValue, measures };
 }
 
 function updateKpiContainer(measures, mainKpiValue, format) {
@@ -125,11 +125,14 @@ async function render(ctx) {
     insertCustomFont(appConfig.styleConfig.customFontFaces);
   }
 
+  // Use the current number format setting from the visualProps
+  const numberFormat = chartModel.visualProps.numberFormat || userNumberFormat;
+
   const kpiValues = calculateKpiValues(chartModel);
   updateKpiContainer(
     kpiValues.measures,
     kpiValues.mainKpiValue,
-    chartModel.visualProps.numberFormat
+    numberFormat
   );
 }
 
@@ -218,6 +221,7 @@ const renderChart = async (ctx) => {
     onPropChange: (propKey, propValue) => {
       if (propKey === 'numberFormat') {
         userNumberFormat = propValue || '0,0';
+        renderChart(ctx); // Re-render the chart with the new format
       } else if (propKey === 'columnOrder' || propKey.startsWith('column')) {
         renderChart(ctx);
       }
