@@ -48,35 +48,41 @@ function getDataForColumn(column, dataArr) {
 }
 
 function calculateKpiValues(chartModel) {
-  const dataArr = chartModel.data?.[0]?.data ?? [];
-  const measureColumns = _.filter(
-    chartModel.columns,
-    (col) => col.type === ColumnType.MEASURE
-  );
+    const dataArr = chartModel.data?.[0]?.data ?? [];
+    const measureColumns = _.filter(
+        chartModel.columns,
+        (col) => col.type === ColumnType.MEASURE
+    );
 
-  if (measureColumns.length === 0 || dataArr.length === 0)
-    return { mainKpiValue: 0, measures: [] };
+    if (measureColumns.length === 0 || dataArr.length === 0)
+        return { mainKpiValue: 0, measures: [] };
 
-  const mainKpiColumn = chartModel?.config?.chartConfig[0]?.dimensions?.find(
-    (it) => it.key === 'x'
-  );
+    // Get the main KPI measure column (first measure in the x-axis)
+    const mainKpiColumn = chartModel?.config?.chartConfig[0]?.dimensions?.find(
+        (it) => it.key === 'x'
+    );
+    
+    const mainKpiValue = _.sum(
+        getDataForColumn(mainKpiColumn.columns[0], dataArr)
+    );
 
-  const mainKpiValue = _.sum(
-    getDataForColumn(mainKpiColumn.columns[0], dataArr)
-  );
+    // Filter out the main KPI column from the comparison measures
+    const comparisonMeasures = measureColumns.filter(
+        (col) => col.id !== mainKpiColumn.columns[0].id
+    );
 
-  const measures = measureColumns.map((col) => {
-    const value = _.sum(getDataForColumn(col, dataArr));
-    const change =
-      mainKpiValue !== 0 ? ((value - mainKpiValue) / Math.abs(mainKpiValue)) * 100 : 0;
-    return {
-      label: col.name,
-      value,
-      change,
-    };
-  });
+    const measures = comparisonMeasures.map((col) => {
+        const value = _.sum(getDataForColumn(col, dataArr));
+        const change =
+            mainKpiValue !== 0 ? ((value - mainKpiValue) / Math.abs(mainKpiValue)) * 100 : 0;
+        return {
+            label: col.name,
+            value,
+            change,
+        };
+    });
 
-  return { mainKpiValue, measures };
+    return { mainKpiValue, measures };
 }
 
 function updateKpiContainer(measures, mainKpiValue, format) {
