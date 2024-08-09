@@ -1,0 +1,80 @@
+body {
+  display: flex;
+  align-items: flex-start; /* Align items to the top */
+  justify-content: flex-start; /* Align items to the left */
+  height: 100vh;
+  margin: 0;
+  background-color: #FFFFFF; /* Set the background color to white */
+  font-family: Optimo-Plain, "Helvetica Neue", Helvetica, Arial, sans-serif; /* Set the font to Helvetica */
+}
+
+.kpi-card {
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align items to the top */
+  align-items: flex-start;
+  background-color: #FFFFFF; /* Set background color to white */
+}
+
+.kpi-value {
+  font-size: 40px; /* Adjust font size to match the image */
+  font-weight: 550; /* Adjust font weight to match the image */
+  color: #1c2330;
+  margin-bottom: 20px;
+  line-height: 47px;
+}
+
+.kpi-comparison {
+  font-size: 16px;
+  color: #777e8b;
+  width: 100%;
+  font-family: Optimo-Plain, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.kpi-measure {
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center; /* Align items in the center vertically */
+  width: 100%;
+}
+
+.kpi-change {
+  font-weight: bold;
+  margin-right: 15px; /* Add 15px space after the change percentage */
+}
+
+.kpi-value-and-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Left align the values and labels */
+}
+
+.kpi-positive {
+  color: green;
+  padding-right: 7px;
+  /* font-family: optimo-plain; */
+}
+
+.kpi-negative {
+  color: red;
+  padding-right: 7px;
+  /* font-family: optimo-plain; */
+}
+
+.arrow {
+  font-weight: bold;
+  font-weight: 200;
+}
+
+.comparisonKPIAbsoluteValue {
+  font-weight: bold;
+  padding-right: 3px;
+  color: #000000;
+  /* font-family: optimo-plain; */
+}
+
+.comparisonKPIName{
+  /* font-family: optimo-plain; */
+}
