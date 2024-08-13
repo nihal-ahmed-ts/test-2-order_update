@@ -185,5 +185,6 @@ const renderChart = async (ctx) => {
     },
   });
 
+  // Handle initial render
   renderChart(ctx);
 })();
