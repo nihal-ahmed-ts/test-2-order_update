@@ -14,7 +14,7 @@ const numberFormatter = (value, format = '') => {
   } else if (value > 1000000 || value < -1000000) {
     formattedValue = userNumberFormatter((value / 1000000), format) + 'M';
   } else if (value > 1000 || value < -1000) {
-    formattedValue = userNumberFormatter((value / 1000), format) + 'K';
+    formattedValue = userNumberFormatter(value / 1000, format) + 'K';
   } else {
     formattedValue = userNumberFormatter(value, format);
   }
@@ -181,6 +181,8 @@ const renderChart = async (ctx) => {
       if (propKey === 'numberFormat') {
         userNumberFormat = propValue || '0,0'; // Use the default format if none provided
         renderChart(ctx); // Re-render the chart with the new format
+      } else if (propKey === 'settingsApply') {
+        renderChart(ctx); // Force re-render on settings tab apply
       }
     },
   });
