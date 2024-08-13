@@ -1,42 +1,28 @@
 import {
-  ChartToTSEvent,
   ColumnType,
   getChartContext,
+  ChartToTSEvent,
 } from '@thoughtspot/ts-chart-sdk';
 import _ from 'lodash';
-import numeral from 'numeral';
 
-const availableColor = ['red', 'green', 'blue'];
-
-const visualPropKeyMap = {
-  0: 'color',
-  1: 'accordion.Color2',
-  2: 'accordion.datalabels',
-};
-
-const exampleClientState = {
-  id: 'chart-id',
-  name: 'custom-kpi-chart',
-  library: 'chartJs',
-};
-
-let userNumberFormat = '0,0'; // Default format if not specified by the user
-
+// Number formatting function
 const numberFormatter = (value, format = '') => {
   let formattedValue = '';
 
   if (value > 1000000000 || value < -1000000000) {
-    formattedValue = userNumberFormatter(value / 1000000000, format) + 'B';
+    formattedValue = userNumberFormatter((value / 1000000000), format) + 'B';
   } else if (value > 1000000 || value < -1000000) {
-    formattedValue = userNumberFormatter(value / 1000000, format) + 'M';
+    formattedValue = userNumberFormatter((value / 1000000), format) + 'M';
   } else if (value > 1000 || value < -1000) {
-    formattedValue = userNumberFormatter(value / 1000, format) + 'K';
+    formattedValue = userNumberFormatter((value / 1000), format) + 'K';
   } else {
     formattedValue = userNumberFormatter(value, format);
   }
 
   return formattedValue;
 };
+
+let userNumberFormat = '0,0'; // Default format if not specified by the user
 
 const userNumberFormatter = (value, format) => {
   return numeral(value).format(format);
@@ -57,24 +43,12 @@ function calculateKpiValues(chartModel) {
   if (measureColumns.length === 0 || dataArr.length === 0)
     return { mainKpiValue: 0, measures: [] };
 
-  // Get the main KPI measure column (first measure in the x-axis)
-  const mainKpiColumn = chartModel?.config?.chartConfig[0]?.dimensions?.find(
-    (it) => it.key === 'x'
-  );
-  
-  const mainKpiValue = _.sum(
-    getDataForColumn(mainKpiColumn.columns[0], dataArr)
-  );
+  const mainKpiValue = _.sum(getDataForColumn(measureColumns[0], dataArr));
 
-  // Filter out the main KPI column from the comparison measures
-  const comparisonMeasures = measureColumns.filter(
-    (col) => col.id !== mainKpiColumn.columns[0].id
-  );
-
-  const measures = comparisonMeasures.map((col) => {
+  const measures = measureColumns.slice(1).map((col) => {
     const value = _.sum(getDataForColumn(col, dataArr));
     const change =
-      mainKpiValue !== 0 ? ((value - mainKpiValue) / Math.abs(mainKpiValue)) * 100 : 0;
+      value !== 0 ? ((mainKpiValue - value) / Math.abs(mainKpiValue)) * 100 : 0;
     return {
       label: col.name,
       value,
@@ -110,29 +84,13 @@ function updateKpiContainer(measures, mainKpiValue, format) {
   });
 }
 
-function insertCustomFont(customFontFaces) {
-  customFontFaces.forEach((it) => {
-    const font = new FontFace(it.family, `url(${it.url})`);
-    document.fonts.add(font);
-  });
-}
-
 async function render(ctx) {
   const chartModel = await ctx.getChartModel();
-  const appConfig = ctx.getAppConfig();
-
-  if (appConfig?.styleConfig?.customFontFaces?.length) {
-    insertCustomFont(appConfig.styleConfig.customFontFaces);
-  }
-
-  // Use the current number format setting from the visualProps
-  const numberFormat = chartModel.visualProps.numberFormat || userNumberFormat;
-
   const kpiValues = calculateKpiValues(chartModel);
   updateKpiContainer(
     kpiValues.measures,
     kpiValues.mainKpiValue,
-    numberFormat
+    chartModel.visualProps.numberFormat
   );
 }
 
@@ -171,7 +129,7 @@ const renderChart = async (ctx) => {
       return [axisConfig];
     },
     getQueriesFromChartConfig: (chartConfig) => {
-      return chartConfig.map((config) =>
+      const queries = chartConfig.map((config) =>
         _.reduce(
           config.dimensions,
           (acc, dimension) => ({
@@ -180,8 +138,9 @@ const renderChart = async (ctx) => {
           { queryColumns: [] }
         )
       );
+      return queries;
     },
-    renderChart,
+    renderChart: (ctx) => renderChart(ctx),
     chartConfigEditorDefinition: [
       {
         key: 'column',
@@ -213,18 +172,15 @@ const renderChart = async (ctx) => {
         {
           key: 'numberFormat',
           type: 'text',
-          defaultValue: '0,0',
+          defaultValue: '0,0', // Default number format
           label: 'Number Format',
         },
       ],
     },
     onPropChange: (propKey, propValue) => {
       if (propKey === 'numberFormat') {
-        userNumberFormat = propValue || '0,0';
-        console.log('Number format updated to:', userNumberFormat); // Debugging line
+        userNumberFormat = propValue || '0,0'; // Use the default format if none provided
         renderChart(ctx); // Re-render the chart with the new format
-      } else if (propKey === 'columnOrder' || propKey.startsWith('column')) {
-        renderChart(ctx);
       }
     },
   });
