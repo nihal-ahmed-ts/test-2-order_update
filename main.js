@@ -223,6 +223,7 @@ const renderChart = async (ctx) => {
         userNumberFormat = propValue || '0,0';
         console.log('Number format updated to:', userNumberFormat); // Debugging line
         renderChart(ctx); // Re-render the chart with the new format
+        ctx.update(); // Force update the context (you can also try ctx.refresh())
       } else if (propKey === 'columnOrder' || propKey.startsWith('column')) {
         renderChart(ctx);
       }
