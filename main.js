@@ -20,7 +20,7 @@ const exampleClientState = {
   library: 'chartJs',
 };
 
-let userNumberFormat = '0,0'; // Default format if not specified by the user
+let userNumberFormat = '0.0'; // Default format if not specified by the user
 
 const numberFormatter = (value, format = '') => {
   let formattedValue = '';
@@ -213,14 +213,14 @@ const renderChart = async (ctx) => {
         {
           key: 'numberFormat',
           type: 'text',
-          defaultValue: '0,0',
+          defaultValue: '0.0',
           label: 'Number Format',
         },
       ],
     },
     onPropChange: (propKey, propValue) => {
       if (propKey === 'numberFormat') {
-        userNumberFormat = propValue || '0,0';
+        userNumberFormat = propValue || '0.0';
         console.log('Number format updated to:', userNumberFormat); // Debugging line
         renderChart(ctx); // Re-render the chart with the new format
       } else if (propKey === 'columnOrder' || propKey.startsWith('column')) {
