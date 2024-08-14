@@ -22,7 +22,7 @@ const numberFormatter = (value, format = '') => {
   return formattedValue;
 };
 
-let userNumberFormat = '0.0'; // Default format if not specified by the user
+let userNumberFormat = '0.0'; // Default format using periods
 
 const userNumberFormatter = (value, format) => {
   return numeral(value).format(format);
@@ -172,14 +172,14 @@ const renderChart = async (ctx) => {
         {
           key: 'numberFormat',
           type: 'text',
-          defaultValue: '0.0', // Default number format
+          defaultValue: '0.0', // Default number format with period
           label: 'Number Format',
         },
       ],
     },
     onPropChange: (propKey, propValue) => {
       if (propKey === 'numberFormat') {
-        userNumberFormat = propValue; // Use the default format if none provided
+        userNumberFormat = propValue || '0.0'; // Use the default format with period
         renderChart(ctx); // Re-render the chart with the new format
       } else if (propKey === 'settingsApply') {
         renderChart(ctx); // Force re-render on settings tab apply
