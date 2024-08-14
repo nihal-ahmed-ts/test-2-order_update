@@ -179,7 +179,7 @@ const renderChart = async (ctx) => {
     },
     onPropChange: (propKey, propValue) => {
       if (propKey === 'numberFormat') {
-        userNumberFormat = propValue || '0.0'; // Use the default format if none provided
+        userNumberFormat = propValue; // Use the default format if none provided
         renderChart(ctx); // Re-render the chart with the new format
       } else if (propKey === 'settingsApply') {
         renderChart(ctx); // Force re-render on settings tab apply
